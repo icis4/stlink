@@ -85,6 +85,7 @@ static int32_t print_data(int32_t ac, char **av) {
     } else {
         snprintf(filepath, MAX_PATH, "%.*s\\chips", (int)(delim - av[0]), av[0]);
     }
+    init_chipids (filepath);
 
     for (int32_t i=2; i<ac; i++) {
         
