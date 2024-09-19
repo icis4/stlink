@@ -100,17 +100,16 @@ int32_t main(int32_t ac, char** av) {
     }
 
     printf("st-flash %s\n", STLINK_VERSION);
-    char* delim = av[0];
-    char filepath[MAX_PATH] = {0};
 
-    delim = strrchr(av[0], '\\');
+    char filepath[MAX_PATH] = {0};
+    char* delim = strrchr(av[0], '\\');;
+
     if (delim == NULL) {
         snprintf(filepath, MAX_PATH, ".\\chips");    
     } else {
         snprintf(filepath, MAX_PATH, "%.*s\\chips", (int)(delim - av[0]), av[0]);
     }
 
-    printf("chips: %s\n", filepath);
     init_chipids (filepath); //STLINK_CHIPS_DIR);
 
     sl = stlink_open_usb(o.log_level, o.connect, (char *)o.serial, o.freq);

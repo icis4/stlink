@@ -77,7 +77,14 @@ static int32_t print_data(int32_t ac, char **av) {
         return (0);
     }
 
-    init_chipids(STLINK_CHIPS_DIR);
+    char filepath[MAX_PATH] = {0};
+    char* delim = strrchr(av[0], '\\');;
+
+    if (delim == NULL) {
+        snprintf(filepath, MAX_PATH, ".\\chips");    
+    } else {
+        snprintf(filepath, MAX_PATH, "%.*s\\chips", (int)(delim - av[0]), av[0]);
+    }
 
     for (int32_t i=2; i<ac; i++) {
         
