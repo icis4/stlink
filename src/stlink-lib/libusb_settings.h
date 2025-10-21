@@ -26,6 +26,8 @@
  *  v1.0.24    | 0x01000108
  *  v1.0.25    | 0x01000109
  *  v1.0.26    | 0x01000110
+ *  v1.0.27    | 0x01000111
+ *  v1.0.28    | 0x01000112
  */
 
 #if defined (__FreeBSD__)
@@ -39,14 +41,14 @@
 #if defined (__FreeBSD__)
     #define MINIMAL_API_VERSION 0x01000102 // v1.0.16
 #elif defined (__OpenBSD__)
-    #define MINIMAL_API_VERSION 0x01000106 // v1.0.22
+    #define MINIMAL_API_VERSION 0x01000108 // v1.0.24
 #elif defined (__linux__)
-    #define MINIMAL_API_VERSION 0x01000106 // v1.0.22
+    #define MINIMAL_API_VERSION 0x01000108 // v1.0.24
 #elif defined (_WIN32)
-    #define MINIMAL_API_VERSION 0x01000109 // v1.0.25
+    #define MINIMAL_API_VERSION 0x01000108 // v1.0.24
 #endif
 
-#if (LIBUSB_API_VERSION < MINIMAL_API_VERSION)
+#if(LIBUSB_API_VERSION < MINIMAL_API_VERSION)
     #error unsupported libusb version
 #endif
 

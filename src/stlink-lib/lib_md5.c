@@ -184,7 +184,7 @@ void Md5Update(Md5Context* Context /* [in out] */, void const* Buffer /* [in] */
 
     saved_lo = Context->lo;
 
-    if ((Context->lo = (saved_lo + BufferSize) & 0x1fffffff) < saved_lo) {
+    if((Context->lo = (saved_lo + BufferSize) & 0x1fffffff) < saved_lo) {
         Context->hi++;
     }
 
@@ -192,10 +192,10 @@ void Md5Update(Md5Context* Context /* [in out] */, void const* Buffer /* [in] */
 
     used = saved_lo & 0x3f;
 
-    if ( used ) {
+    if( used ) {
         free = 64 - used;
 
-        if ( BufferSize < free ) {
+        if( BufferSize < free ) {
             memcpy( &Context->buffer[used], Buffer, BufferSize );
             return;
         }
@@ -206,7 +206,7 @@ void Md5Update(Md5Context* Context /* [in out] */, void const* Buffer /* [in] */
         TransformFunction(Context, Context->buffer, 64);
     }
 
-    if ( BufferSize >= 64 ) {
+    if( BufferSize >= 64 ) {
         Buffer = TransformFunction( Context, Buffer, BufferSize & ~(uint32_t) 0x3f );
         BufferSize &= 0x3f;
     }
@@ -229,7 +229,7 @@ void Md5Finalise(Md5Context* Context /* [in out] */, MD5_HASH* Digest /* [in] */
 
     free = 64 - used;
 
-    if (free < 8) {
+    if(free < 8) {
         memset( &Context->buffer[used], 0, free );
         TransformFunction( Context, Context->buffer, 64 );
         used = 0;

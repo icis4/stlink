@@ -2,16 +2,19 @@
 
 # v1.8.1
 
-Release date: 2024-09-01
+Release date: 2025-xx-xx
 
 This release drops support for some older operating systems. Check project README for details.
 
 Updated system requirements:
-- `cmake` >= 3.13.0
-- `libusb` >= 1.0.22
-- `libgtk-dev` >= 3.22.30
+- C-Standard: C17 (ISO/IEC 9899:2018)
+- `cmake` >= 3.18.3
+- `libusb` >= 1.0.24
+- `libgtk-dev` >= 3.24.30
 
 Features:
+
+- Show all info during full erase ([#1363](https://github.com/stlink-org/stlink/pull/1363), commit [#6a6718b](https://github.com/stlink-org/stlink/commit/6a6718b3342b6c5e282a4e33325b9f97908a0692))
 - Added support for STLINK-V3PWR ([#1388](https://github.com/stlink-org/stlink/pull/1388), [#1389](https://github.com/stlink-org/stlink/pull/1389))
 - Dynamic SRAM size for F4 memory map ([#1390](https://github.com/stlink-org/stlink/pull/1390))
 - Modifications to allow building of toolset in OpenBSD ([#1392](https://github.com/stlink-org/stlink/pull/1392))
@@ -20,21 +23,45 @@ Features:
 - Improvements for stlink-gui ([#1411](https://github.com/stlink-org/stlink/pull/1411))
 - [STM32U575/585]: Added support for OTP bytes ([#1419](https://github.com/stlink-org/stlink/pull/1419))
 - [STM32Gx]: Added erase support for multi-bank products ([#1420](https://github.com/stlink-org/stlink/pull/1420))
-
+- libusb-cmake as libusb provider and added support for MSVC ([#1424](https://github.com/stlink-org/stlink/pull/1424), [#1440](https://github.com/stlink-org/stlink/pull/1440))
+- Added support for STM32U073 ([#1436](https://github.com/stlink-org/stlink/pull/1436), commit [#11e357a](https://github.com/stlink-org/stlink/commit/11e357ae2a34c5f5911c0051fa513659b9bbd7fa))
+- [STM32L4Q5CG]: Added support for device ([#1438](https://github.com/stlink-org/stlink/pull/1438), [#1439](https://github.com/stlink-org/stlink/pull/1439))
+- Corrected and unified GitHub-Actions C/C++ CI workflow ([#1446](https://github.com/stlink-org/stlink/pull/1446), [#1449](https://github.com/stlink-org/stlink/pull/1449))
+- Make SYS_OPEN in semihosting recognize ":tt" ([#1447](https://github.com/stlink-org/stlink/pull/1447))
+- [STM32G4]: Erase pages on flash bank 2 ([#1456](https://github.com/stlink-org/stlink/pull/1456), [#1457](https://github.com/stlink-org/stlink/pull/1457))
+- STM32 flash type implementation for WB05, WB06/07, WB09, WL3x ([#1466](https://github.com/stlink-org/stlink/pull/1466))
+  
 Updates & changes:
+
+- [stlink-lib] Clarified warning message for data alignment ([#1371](https://github.com/stlink-org/stlink/pull/1371), commit [#40ee5f4](https://github.com/stlink-org/stlink/commit/40ee5f4bd1151cec65f291f0166429b061c6e5c0))
+- Rewrite commandline usage text for st-flash tool ([#1372](https://github.com/stlink-org/stlink/pull/1372), commit [#95862cc](https://github.com/stlink-org/stlink/commit/95862cc687203ca20e328804f149959c51da2947))
 - Debian 11 x64 doesn't work with v1.8.0 because of incompatible glibc ([#1376](https://github.com/stlink-org/stlink/pull/1376), commit [#ece34ef](https://github.com/stlink-org/stlink/commit/ece34efbce579ca7d367c58f903ffa6dc7bd96e6))
 - [STM32L4R5ZI]: gdb-multiarch uses wrong osabi ([#1386](https://github.com/stlink-org/stlink/pull/1386), [#1387](https://github.com/stlink-org/stlink/pull/1387), [#1394](https://github.com/stlink-org/stlink/pull/1394))
 - [doc] STM32H573 reports chipid 0x000 ([#1398](https://github.com/stlink-org/stlink/pull/1398), commit [#3655871](https://github.com/stlink-org/stlink/commit/3655871f8dd97294bbee191c1c7341c8a129af2f))
+- [doc] Updated README.md ([#1453](https://github.com/stlink-org/stlink/pull/1453))
+- [doc] Corrected libusb package name in installation instructions ([#1455](https://github.com/stlink-org/stlink/pull/1455))
 
 Fixes:
 
+- Can't build stlink 1.8.0 for Fedora ([#1365](https://github.com/stlink-org/stlink/pull/1365), [#1444](https://github.com/stlink-org/stlink/pull/1444), commit [#6a6718b](https://github.com/stlink-org/stlink/commit/6a6718b3342b6c5e282a4e33325b9f97908a0692))
+- Fixed include path for header file poll.h ([#1370](https://github.com/stlink-org/stlink/pull/1370), commit [#710e1d3](https://github.com/stlink-org/stlink/commit/710e1d3c3b72187769fcc6a4878c73e35ce03f9b))
 - Cmake minimal version mismatch ([#1374](https://github.com/stlink-org/stlink/pull/1374), [#1375](https://github.com/stlink-org/stlink/pull/1375), commit [#1ee7f6b](https://github.com/stlink-org/stlink/commit/1ee7f6b6c05e305112bb070ae571ebbe26c55946))
 - Added a graceful way to terminate st-util ([#1395](https://github.com/stlink-org/stlink/pull/1395), [#1396](https://github.com/stlink-org/stlink/pull/1396))
 - [st-trace] Bug in function static bool read_trace( ) ([#1400](https://github.com/stlink-org/stlink/pull/1400), commit [#32ce4bf](https://github.com/stlink-org/stlink/commit/32ce4bf88a816fb6a9841a33e6c5f6b593a9b927))
 - Fixed STM32H7 FLASH_OPTCR unlock sequence ([#1401](https://github.com/stlink-org/stlink/pull/1401), [#1416](https://github.com/stlink-org/stlink/pull/1416))
 - Restored support for STM32G4 Cat4 device STM32G491 ([#1403](https://github.com/stlink-org/stlink/pull/1403), [#1414](https://github.com/stlink-org/stlink/pull/1414))
+- Target reset is less reliable on testing branch ([#1409](https://github.com/stlink-org/stlink/pull/1409), commit [#733893a](https://github.com/stlink-org/stlink/commit/733893a50b1cc9323765a62c456c129ed6807886))
 - Fixed STM32H7 option byte programming ([#1417](https://github.com/stlink-org/stlink/pull/1417))
-- Latest release stlink-1.8.0-win32 doesn't run ([#1364](https://github.com/stlink-org/stlink/pull/1364), [#1410](https://github.com/stlink-org/stlink/pull/1410) commit [_commit-ID TBD_])
+- Latest release stlink-1.8.0-win32 doesn't run ([#1364](https://github.com/stlink-org/stlink/pull/1364), [#1410](https://github.com/stlink-org/stlink/pull/1410), commit [#e493109](https://github.com/stlink-org/stlink/commit/e4931097f887d8a048d1d188388b82ced918cf08))
+- Fixed STLINK-V3 programmer lock up when no target connected ([#1399](https://github.com/stlink-org/stlink/pull/1399), [#1467](https://github.com/stlink-org/stlink/pull/1467))
+- Make path to .chip files relative to installation directory on Windows ([#1421](https://github.com/stlink-org/stlink/pull/1421))
+- Re-add support for STM32F411xC/xE option bytes read/write ([#1422](https://github.com/stlink-org/stlink/pull/1422))
+- Replaced deprecated cmd to fix package uninstall ([#1426](https://github.com/stlink-org/stlink/pull/1426))
+- Fixed compilation error -Wshorten-64-to-32 in stlink-lib/usb.c ([#1427](https://github.com/stlink-org/stlink/pull/1427))
+- st-util cannot parse -V and -F options and --freq option results in a segmentation fault ([#1428](https://github.com/stlink-org/stlink/pull/1428), [#1429](https://github.com/stlink-org/stlink/pull/1429))
+- st-util: $--freq parameter case sensitive in 1.8.0 but not on previous versions ([#1445](https://github.com/stlink-org/stlink/pull/1445), commit [#7900006](https://github.com/stlink-org/stlink/commit/7900006619ce22cb900151120f9aeebe022cd3ec))
+- [STM32F205]: st-flash broken due to introduced bug in stlink-lib/usb.c ([#1451](https://github.com/stlink-org/stlink/pull/1451), commit [#9446bf5](https://github.com/stlink-org/stlink/commit/9446bf570d23f2c1329abd313ae81197b4df4210))
+
 
 # v1.8.0
 
@@ -44,6 +71,7 @@ This release drops support for macOS and some older operating systems. Check pro
 Removed Travis CI integration as it is no longer functional.
 
 Updated system requirements:
+- C-Standard: C11 (ISO/IEC 9899:2011)
 - `cmake` >= 3.13.0
 - `libusb` >= 1.0.22
 - `libgtk-dev` >= 3.22.30
@@ -142,6 +170,7 @@ Fixes:
 - stlink-gui: failed to allocate 139988352155568 bytes ([#1356](https://github.com/stlink-org/stlink/pull/1356))
 - [STM32U575RGT6]: Verification failed at offset 43008 ([#1362](https://github.com/stlink-org/stlink/pull/1362), commit [#0145bae](https://github.com/stlink-org/stlink/commit/0145baeb2e3bac31bf9d3cbd0dab38d70618d46b))
 
+
 # v1.7.0
 
 Release date: 2021-04-25
@@ -211,6 +240,7 @@ Fixes:
 - Fixed STM32WB55 reading DEBUG IDCODE from the wrong address ([#1100](https://github.com/stlink-org/stlink/pull/1100), [#1101](https://github.com/stlink-org/stlink/pull/1101))
 - Applied missing changes to tests ([#1119](https://github.com/stlink-org/stlink/pull/1119))
 - Fixed reading of chip ID on Cortex-M0+ core ([#1017](https://github.com/stlink-org/stlink/pull/1017), [#1125](https://github.com/stlink-org/stlink/pull/1125), [#1126](https://github.com/stlink-org/stlink/pull/1126), [#1133](https://github.com/stlink-org/stlink/pull/1133))
+
 
 # v1.6.1
 
@@ -309,6 +339,7 @@ Fixes:
 - Fixed udev rules installing to wrong directory ([#966](https://github.com/stlink-org/stlink/pull/966))
 - Fixed formatting for options display in `st-flash` & `st-info` (commits [#c783d0e](https://github.com/stlink-org/stlink/commit/c783d0e777ccc83a7a8be26a4f4d3414e0478560) and [#562cd24](https://github.com/stlink-org/stlink/commit/562cd2496e696dbd22950925866aac662d81ee5f))
 
+
 # v1.6.0
 
 Release date: 2020-02-20
@@ -361,6 +392,7 @@ General project updates:
 - Added `CODE_OF_CONDUCT` (Nightwalker-87)
 - Archived page from github project wiki to doc/wiki_old.md (Nightwalker-87)
 
+
 # v1.5.1
 
 Release date: 2018-09-13
@@ -394,6 +426,7 @@ Updates and fixes:
 - Return correct value on `EOF` for semihosting `SYS_READ` ([#726](https://github.com/stlink-org/stlink/pull/726), [#727](https://github.com/stlink-org/stlink/pull/727), [#728](https://github.com/stlink-org/stlink/pull/728), [#729](https://github.com/stlink-org/stlink/pull/729), [#730](https://github.com/stlink-org/stlink/pull/730), [#731](https://github.com/stlink-org/stlink/pull/731), [#732](https://github.com/stlink-org/stlink/pull/732))
 - FreeBSD defines `LIBUSB_API_VERSION` instead of `LIBUSBX_API_VERSION` ([#733](https://github.com/stlink-org/stlink/pull/733))
 
+
 # v1.5.0
 
 Release date: 2018-02-16
@@ -415,6 +448,7 @@ Updates and fixes:
 - Fixed `__FILE__` base name extraction ([#624](https://github.com/stlink-org/stlink/pull/624), [#628](https://github.com/stlink-org/stlink/pull/628), [#648](https://github.com/stlink-org/stlink/pull/648))
 - Added debian/triggers to run `ldconfig` ([#664](https://github.com/stlink-org/stlink/pull/664))
 - Fixed build on Fedora with GCC 8 ([#666](https://github.com/stlink-org/stlink/pull/666), [#667](https://github.com/stlink-org/stlink/pull/667), [#668](https://github.com/stlink-org/stlink/pull/668))
+
 
 # v1.4.0
 
@@ -443,6 +477,7 @@ Updates and fixes:
 - Fixed flashing to `F0 device` targets ([#594](https://github.com/stlink-org/stlink/pull/594), [#595](https://github.com/stlink-org/stlink/pull/595))
 - Fixed wrong counting when flashing ([#605](https://github.com/stlink-org/stlink/pull/605))
 
+
 # v1.3.1
 
 Release date: 2017-02-25
@@ -461,6 +496,7 @@ Updates and fixes:
 - Stripped full paths to source files in log ([#548](https://github.com/stlink-org/stlink/pull/548))
 - Fixed incorrect release folder name in docs ([#560](https://github.com/stlink-org/stlink/pull/560))
 - Fixed compilation when path includes spaces ([#561](https://github.com/stlink-org/stlink/pull/561))
+
 
 # v1.3.0
 
@@ -510,6 +546,7 @@ Updates and fixes:
 - Reset flash mass erase (MER) bit after mass erase for safety ([#489](https://github.com/stlink-org/stlink/pull/489))
 - Wrong extract command in `FindLibUSB.cmake` ([#510](https://github.com/stlink-org/stlink/pull/510), [#511](https://github.com/stlink-org/stlink/pull/511))
 - Fixed compilation error on Ubuntu 16.10 ([#514](https://github.com/stlink-org/stlink/pull/514), [#525](https://github.com/stlink-org/stlink/pull/525))
+
 
 # v1.2.0
 

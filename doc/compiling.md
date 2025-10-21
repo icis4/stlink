@@ -1,43 +1,46 @@
 # Compiling from sources
 
-
-## Microsoft Windows (10, 11)
+## Microsoft Windows - MSVC (11)
 
 ### Common Requirements
 
 On Windows users should ensure that the following software is installed:
 
-- `git` (_optional, but recommended_)
-- `7zip`
+- `git` (Required for building LibUSB if missing)
+- `7zip` (_optional_)
 - `cmake`
-- `MSYS2`
+- `MSVC` Compiler (Tested with Visual Studio 2022 and Build Tools for Visual Studio 2022)
 
 ### Installation
 
-1. Install `git` from <https://git-scm.com/download/win>
+1. Install `Build Tools for Visual Studio` from <https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022>
 2. Install `cmake` from <https://cmake.org/download/#latest> --> Binary distributions --> Windows x64 Installer<br />
    Ensure that you add cmake to the $PATH system variable when following the instructions by the setup assistant.
-3. Install `MSYS2` from <https://www.msys2.org/><br />
    Follow the installation instructions on the website.
-4. Install `mingw-w64` via the MSYS2 UCRT64 Shell: `pacman -S mingw-w64-x86_64-make`
-5. Fetch the project sourcefiles by running `git clone https://github.com/stlink-org/stlink.git`from the command-line (cmd.exe)<br />
-   or download and extract (`7zip`) the stlink zip-sourcefolder from the Release page on GitHub.
+3. Fetch the project source files by running `git clone https://github.com/stlink-org/stlink.git` from the command-line (`cmd.exe`/`powershell.exe`)<br />
+   or download and extract (`7zip`) the latest stlink `.zip` release from the Release page on GitHub.
 
 ### Building
 
-1. Open the command-line (cmd.exe) with administrator privileges
+1. Open the command-line (`cmd.exe`/`powershell.exe`) with administrator privileges
 2. Move to the `stlink` directory with `cd C:\$Path-to-your-stlink-folder$\`
-3. Execute `mingw64-build.bat`
-
-Depending on the flavour of compilation the final executables will be placed in the following directories:
-- Local compilation: `<project_root>\build-mingw\bin`
-- Local installation: `C:\Program Files (x86)\stlink\bin`
-- Package Generation (portable): `C:\Users\swift\Desktop\stlink\build-mingw\dist`
+3. Create a new `build` subdirectory and move into it with `cd .\build`.
+4. Configure the project, using the following command: `cmake -G "Visual Studio 17 2022" .. -DCMAKE_BUILD_TYPE="Release"`
+5. Build the project, using the following command: `cmake --build . --target ALL_BUILD`
+6. Install the project, using the following command: `cmake --build . --target INSTALL`
+7. Add the `bin` folder of the installation path (`C:\Program Files (x86)\stlink\bin`) to the `PATH` environment variables:
+   1. Run `SystemPropertiesAdvanced.exe`
+   2. press on `Environment Variables` button
+   3. On `System Variables` list, find and select `Path` variable
+   4. Press `Edit..` button bellow the list
+   5. On the new Window, press `New` button
+   6. On the new row, type the `bin` path of your installation (`C:\Program Files (x86)\stlink\bin`)
+   7. Press `OK` button to all three windows to save your changes
 
 **NOTE:**
 
-[ST-LINK drivers](https://www.st.com/en/development-tools/stsw-link009.html) are required for programmers to work with `stlink`.
-
+1. [ST-LINK drivers](https://www.st.com/en/development-tools/stsw-link009.html) are required for programmers to work with `stlink`.
+2. Package generation for MSVC is not yet implemented/tested.
 
 ## Linux
 
@@ -50,12 +53,12 @@ Install the following packages from your package repository:
 - `build-essential` (on Debian based distros (Debian, Ubuntu))
 - `cmake`
 - `rpm` (on Debian based distros (Debian, Ubuntu), needed for package build with `make package`)
-- `libusb-1.0`
+- `libusb-1.0-0`
 - `libusb-1.0-0-dev` (development headers for building)
 - `libgtk-3-dev` (_optional_, needed for `stlink-gui`)
 - `pandoc` (_optional_, needed for generating manpages from markdown)
 
-or execute (Debian-based systems only): `apt-get install gcc build-essential cmake libusb-1.0 libusb-1.0-0-dev libgtk-3-dev pandoc`
+or execute (Debian-based systems only): `apt-get install gcc build-essential cmake rpm libusb-1.0-0 libusb-1.0-0-dev libgtk-4-dev pandoc`
 
 (Replace gcc with the intended C-compiler if necessary or leave out any optional package not needed.)
 
@@ -77,12 +80,9 @@ or execute (Debian-based systems only): `apt-get install gcc build-essential cma
 5. Run `make debug` to create the _Debug_ target (_optional_)<br />
    The debug target is only necessary in order to modify the sources and to run under a debugger.
 6. Run `make package`to build a Debian Package. The generated packages can be found in the subdirectory `./build/Release/dist`.
+7. Installing system-wide (`sudo make install`) requires the dynamic library cache to be updated with `sudo ldconfig` afterwards.
 
 As an option you may also install to an individual user-defined folder e.g `$HOME` with `make install DESTDIR=$HOME`.
-
-### How to avoid the error message: "Can not open shared object file"
-
-When installing system-wide (`sudo make install`) the dynamic library cache needs to be updated with the command `ldconfig`.
 
 #### Removal:
 

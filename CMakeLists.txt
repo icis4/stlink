@@ -2,14 +2,13 @@
 # General cmake settings
 ###
 
-cmake_minimum_required(VERSION 3.10.2)
-cmake_policy(SET CMP0042 NEW)
+cmake_minimum_required(VERSION 3.19)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
@@ -96,6 +95,7 @@ endif()
 ###
 
 find_package(libusb REQUIRED)
+add_definitions(${LIBUSB_DEFINITIONS}) #only affects MSVC, For ssize-t
 
 ## Check for system-specific additional header files and libraries
 
@@ -128,9 +128,11 @@ if (STLINK_HAVE_UNISTD_H)
     add_definitions(-DSTLINK_HAVE_UNISTD_H)
 endif()
 
-CHECK_INCLUDE_FILE(dirent.h STLINK_HAVE_DIRENT_H)
-if (STLINK_HAVE_DIRENT_H)
-    add_definitions(-DSTLINK_HAVE_DIRENT_H)
+if (NOT WIN32) # Use GetModuleFileNameA and FindFirstFileA on Windows
+    CHECK_INCLUDE_FILE(dirent.h STLINK_HAVE_DIRENT_H)
+    if (STLINK_HAVE_DIRENT_H)
+        add_definitions(-DSTLINK_HAVE_DIRENT_H)
+    endif()
 endif()
 
 if (MSVC)
@@ -168,24 +170,26 @@ add_subdirectory(inc)
 
 ## Define source- and headerfiles for stlink library
 set(STLINK_HEADERS
-        inc/backend.h
         inc/stlink.h
+        inc/stlink_backend.h
+        inc/stlink_cmd.h
         inc/stm32.h
-        inc/stm32flash.h
+        inc/stm32_flash.h
         src/stlink-lib/calculate.h
         src/stlink-lib/chipid.h
-        src/stlink-lib/commands.h
         src/stlink-lib/common_flash.h
         src/stlink-lib/flash_loader.h
         src/stlink-lib/helper.h
         src/stlink-lib/libusb_settings.h
         src/stlink-lib/lib_md5.h
         src/stlink-lib/logging.h
+        src/stlink-lib/logging_spdlog_wr.h
         src/stlink-lib/map_file.h
         src/stlink-lib/md5.h
         src/stlink-lib/option_bytes.h
-        src/stlink-lib/register.h
-        src/stlink-lib/sg.h
+        src/stlink-lib/programmer.h
+        src/stlink-lib/read_write.h
+        src/stlink-lib/sg_legacy.h
         src/stlink-lib/usb.h
         )
 
@@ -193,16 +197,17 @@ set(STLINK_SOURCE
         src/stlink-lib/calculate.c
         src/stlink-lib/chipid.c
         src/stlink-lib/common_flash.c
-        src/stlink-lib/common.c
+        src/stlink-lib/common_legacy.c
         src/stlink-lib/flash_loader.c
         src/stlink-lib/helper.c
+        src/stlink-lib/lib_md5.c
         src/stlink-lib/logging.c
         src/stlink-lib/map_file.c
-        src/stlink-lib/lib_md5.c
         src/stlink-lib/md5.c
         src/stlink-lib/option_bytes.c
+        src/stlink-lib/programmer.c
         src/stlink-lib/read_write.c
-        src/stlink-lib/sg.c
+        src/stlink-lib/sg_legacy.c
         src/stlink-lib/usb.c
         )
 
@@ -262,6 +267,13 @@ set_target_properties(${STLINK_LIB_SHARED} PROPERTIES
                         OUTPUT_NAME ${PROJECT_NAME}
                         )
 
+# Since we're not using __declspec(dllexport), WINDOWS_EXPORT_ALL_SYMBOLS is mandatory for MSVC.
+# This call will only affect MSVC, compilers/OSes ignore it.
+# TODO: Use dllexport on the desired functions
+set_target_properties(${STLINK_LIB_SHARED} PROPERTIES
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+
 # Link shared library
 if (WIN32)
     target_link_libraries(${STLINK_LIB_SHARED} ${LIBUSB_LIBRARY} ${SSP_LIB} wsock32 ws2_32)
@@ -269,8 +281,23 @@ else ()
     target_link_libraries(${STLINK_LIB_SHARED} ${LIBUSB_LIBRARY} ${SSP_LIB})
 endif()
 
-install(TARGETS ${STLINK_LIB_SHARED} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
+# For MSVC:
+#    shared libraries (.dll) go to `bin`
+#    their Import Libraries (aka: ImpLibs; .lib files) go to `lib`
+if (MSVC)
+    install(TARGETS ${STLINK_LIB_SHARED}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+# For non-MSVC:
+#    shared libraries go to `lib`
+#    Archive destination is set to `lib` as failsafe
+else()
+    install(TARGETS ${STLINK_LIB_SHARED}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
 
 ###
 # Static library
@@ -366,7 +393,7 @@ endif()
 
 # MCU configuration files
 if (WIN32)
-    set(CMAKE_CHIPS_DIR ${CMAKE_INSTALL_PREFIX}/config/chips)
+set(CMAKE_CHIPS_DIR ./config/chips)
 else ()
     set(CMAKE_CHIPS_DIR ${CMAKE_INSTALL_FULL_DATADIR}/${PROJECT_NAME}/config/chips)
 endif()

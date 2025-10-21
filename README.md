@@ -61,7 +61,7 @@ Our [tutorial](doc/tutorial.md) may help you along with some advanced tasks and 
 
 **Windows**:
 
-As of Release v1.6.1 stand-alone Windows binaries are made available (again) on the release page of the project.
+As of Release v1.6.1 stand-alone Windows binaries are made available (again) on the [release page](https://github.com/stlink-org/stlink/releases) of the project.
 Please ensure to select the correct version for your system (i686 or x86_64). The archive file can be unzipped to any desired location as it does not contain any hardcoded paths. However we suggest to move the unzipped application folder to `C:\Program Files\` on 32-bit systems and to `C:\Program Files (x86)\` on 64-bit systems (the toolset is 32-bit).
 
 Alternatively one may compile and install from source as described in our [compiling manual](doc/compiling.md#Windows).

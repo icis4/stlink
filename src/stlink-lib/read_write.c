@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include <stlink.h>
+#include <stlink_backend.h>
 #include "read_write.h"
 
 #include "logging.h"
@@ -42,7 +43,7 @@ int32_t stlink_read_debug32(stlink_t *sl, uint32_t addr, uint32_t *data) {
   int32_t ret;
 
   ret = sl->backend->read_debug32(sl, addr, data);
-  if (!ret)
+  if(!ret)
     DLOG("*** stlink_read_debug32  %#010x at %#010x\n", *data, addr);
 
   return (ret);
@@ -56,7 +57,7 @@ int32_t stlink_write_debug32(stlink_t *sl, uint32_t addr, uint32_t data) {
 int32_t stlink_read_mem32(stlink_t *sl, uint32_t addr, uint16_t len) {
   DLOG("*** stlink_read_mem32 ***\n");
 
-  if (len % 4 != 0) { // !!! never ever: fw gives just wrong values
+  if(len % 4 != 0) { // !!! never ever: fw gives just wrong values
     ELOG("Data length doesn't have a 32 bit alignment: +%d byte.\n", len % 4);
     return (-1);
   }
@@ -67,7 +68,7 @@ int32_t stlink_read_mem32(stlink_t *sl, uint32_t addr, uint16_t len) {
 int32_t stlink_write_mem32(stlink_t *sl, uint32_t addr, uint16_t len) {
   DLOG("*** stlink_write_mem32 %u bytes to %#x\n", len, addr);
 
-  if (len % 4 != 0) {
+  if(len % 4 != 0) {
     ELOG("Data length doesn't have a 32 bit alignment: +%d byte.\n", len % 4);
     return (-1);
   }
@@ -84,7 +85,7 @@ int32_t stlink_read_reg(stlink_t *sl, int32_t r_idx, struct stlink_reg *regp) {
   DLOG("*** stlink_read_reg\n");
   DLOG(" (%d) ***\n", r_idx);
 
-  if (r_idx > 20 || r_idx < 0) {
+  if(r_idx > 20 || r_idx < 0) {
     fprintf(stderr, "Error: register index must be in [0..20]\n");
     return (-1);
   }
@@ -104,13 +105,13 @@ int32_t stlink_read_unsupported_reg(stlink_t *sl, int32_t r_idx,
   DLOG("*** stlink_read_unsupported_reg\n");
   DLOG(" (%d) ***\n", r_idx);
 
-  /* Convert to values used by STLINK_REG_DCRSR */
-  if (r_idx >= 0x1C &&
+  /* Convert to values used by STM32_REG_DCRSR */
+  if(r_idx >= 0x1C &&
       r_idx <= 0x1F) { // primask, basepri, faultmask, or control
     r_convert = 0x14;
-  } else if (r_idx == 0x40) { // FPSCR
+  } else if(r_idx == 0x40) { // FPSCR
     r_convert = 0x21;
-  } else if (r_idx >= 0x20 && r_idx < 0x40) {
+  } else if(r_idx >= 0x20 && r_idx < 0x40) {
     r_convert = 0x40 + (r_idx - 0x20);
   } else {
     fprintf(stderr, "Error: register address must be in [0x1C..0x40]\n");
@@ -127,13 +128,13 @@ int32_t stlink_write_unsupported_reg(stlink_t *sl, uint32_t val, int32_t r_idx,
   DLOG("*** stlink_write_unsupported_reg\n");
   DLOG(" (%d) ***\n", r_idx);
 
-  /* Convert to values used by STLINK_REG_DCRSR */
-  if (r_idx >= 0x1C &&
+  /* Convert to values used by STM32_REG_DCRSR */
+  if(r_idx >= 0x1C &&
       r_idx <= 0x1F) {        /* primask, basepri, faultmask, or control */
     r_convert = r_idx;        // the backend function handles this
-  } else if (r_idx == 0x40) { // FPSCR
+  } else if(r_idx == 0x40) { // FPSCR
     r_convert = 0x21;
-  } else if (r_idx >= 0x20 && r_idx < 0x40) {
+  } else if(r_idx >= 0x20 && r_idx < 0x40) {
     r_convert = 0x40 + (r_idx - 0x20);
   } else {
     fprintf(stderr, "Error: register address must be in [0x1C..0x40]\n");

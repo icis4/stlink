@@ -56,7 +56,7 @@ struct stlink_libusb {
     uint32_t ep_req;
     uint32_t ep_rep;
     uint32_t ep_trace;
-    int32_t protocoll;
+    int32_t protocol;
     uint32_t sg_transfer_idx;
     uint32_t cmd_len;
 };
