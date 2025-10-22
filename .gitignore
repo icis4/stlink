@@ -12,3 +12,4 @@ obj-*
 *.user*
 *.swp
 /build-mingw
+/build2

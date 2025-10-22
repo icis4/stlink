@@ -238,16 +238,8 @@ int32_t main(int32_t argc, char** argv) {
 
     printf("st-util %s\n", STLINK_VERSION);
 
-    char filepath[MAX_PATH] = {0};
-    char* delim = strrchr(argv[0], '\\');;
-
-    if (delim == NULL) {
-        snprintf(filepath, MAX_PATH, ".\\chips");    
-    } else {
-        snprintf(filepath, MAX_PATH, "%.*s\\chips", (int)(delim - argv[0]), argv[0]);
-    }
-
-    init_chipids (filepath); //STLINK_CHIPS_DIR);
+    char chips_path[MAX_PATH];
+    init_chipids(get_chips_path(argv[0], chips_path, MAX_PATH));
 
     sl = stlink_open_usb(state.logging_level, state.connect_mode, state.serialnumber, state.freq);
     if(sl == NULL) { return (1); }

@@ -77,15 +77,8 @@ static int32_t print_data(int32_t ac, char **av) {
         return (0);
     }
 
-    char filepath[MAX_PATH] = {0};
-    char* delim = strrchr(av[0], '\\');;
-
-    if (delim == NULL) {
-        snprintf(filepath, MAX_PATH, ".\\chips");    
-    } else {
-        snprintf(filepath, MAX_PATH, "%.*s\\chips", (int)(delim - av[0]), av[0]);
-    }
-    init_chipids (filepath);
+    char chips_path[MAX_PATH];
+    init_chipids(get_chips_path(av[0], chips_path, MAX_PATH));
 
     for(int32_t i=2; i<ac; i++) {
         

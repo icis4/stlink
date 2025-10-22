@@ -12,7 +12,15 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 #include <stdlib.h>
+
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <limits.h>
+#endif
 
 #include "helper.h"
 
@@ -23,29 +31,57 @@ uint32_t time_ms() {
 }
 
 int32_t arg_parse_freq(const char *str) {
-    if(str == NULL) {
-        return -1;                    // faulty input
-    }
-    
-    char* tail = NULL;
-    int32_t value = (uint32_t) strtol(str, &tail, 10);
+    char *tail;
+    int32_t value = (int32_t) strtol(str, &tail, 10);
 
-    /* == Input value interpretation ==
-     *
-     * These decimal values represent kHz.
-     * The prefix "k" may be added for better understanding, but has no effect.
-     * In addition, values can be interpreted as thousands of kHz thus representing MHz.
-     * This is achieved by using the prefix "M".
-     */
-
-    if(tail == NULL) {
-        return -1;                    // faulty integer conversion
-    } else if(tail[0] == '\0') {
-        return value;                 // no prefix: kHz
-    } else if((tail[0] == 'k' || tail[0] == 'K') && tail[1] == '\0') {
-        return value;                 // k prefix: kHz
-    } else if(tail[0] == 'M' && tail[1] == '\0') {
-        return (value * 1000);        // M prefix: MHz
+    if (tail[0] == 'M' && tail[1] == '\0') {
+        value = value*1000;
+    } else if ((tail[0] != 'k' || tail[1] != '\0') && tail[0] != '\0') {
+        return -1;
     }
-    return -1;                        // invalid prefix
+
+    return value;
+}
+
+const char* get_chips_path(char* argv0, char* buf, size_t size) {
+#if defined(_WIN32)
+    (void)argv0; // Unused on Windows
+    DWORD len = GetModuleFileNameA(NULL, buf, (DWORD)size);
+    if (len == 0 || len >= size) {
+        // Fallback or error
+        strncpy(buf, ".\\chips", size);
+        return buf;
+    }
+    char* delim = strrchr(buf, '\\');
+    if (delim) {
+        *(delim + 1) = '\0';
+        strncat(buf, "chips", size - strlen(buf) - 1);
+    } else {
+        strncpy(buf, ".\\chips", size);
+    }
+#else // POSIX-like systems
+    ssize_t len = readlink("/proc/self/exe", buf, size - 1);
+    if (len != -1) {
+        buf[len] = '\0';
+        char* delim = strrchr(buf, '/');
+        if (delim) {
+            *(delim + 1) = '\0';
+            strncat(buf, "chips", size - strlen(buf) - 1);
+        } else {
+            strncpy(buf, "./chips", size);
+        }
+    } else {
+        // Fallback to argv[0] if /proc/self/exe is not available
+        strncpy(buf, argv0, size);
+        buf[size - 1] = '\0';
+        char* delim = strrchr(buf, '/');
+        if (delim) {
+            *(delim + 1) = '\0';
+            strncat(buf, "chips", size - strlen(buf) - 1);
+        } else {
+            strncpy(buf, "./chips", size);
+        }
+    }
+#endif
+    return buf;
 }
