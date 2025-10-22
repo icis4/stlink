@@ -22,6 +22,10 @@ Use hexadecimal format for the *ADDR* and *SIZE*.
 
 The STLink device to use can be specified using the --serial parameter.
 
+When writing Intel HEX files, only flash pages that contain data from the HEX
+are erased and programmed. Pages not referenced by the HEX remain untouched.
+Use --mass-erase to erase the entire flash explicitly.
+
 # COMMANDS
 
 write *FILE* *ADDR*

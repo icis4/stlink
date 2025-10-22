@@ -31,6 +31,82 @@
 
 static stlink_t *connected_stlink = NULL;
 
+// Helper: find the start address and size of the flash page that contains addr
+static void find_page_start_and_size(stlink_t *sl, stm32_addr_t addr, stm32_addr_t *page_start, uint32_t *page_size) {
+    // Start at flash base and iterate pages until we reach the one containing addr
+    stm32_addr_t p = sl->flash_base;
+    while(1) {
+        uint32_t ps = stlink_calculate_pagesize(sl, p);
+        if(addr < (p + ps)) {
+            if(page_start) { *page_start = p; }
+            if(page_size)  { *page_size = ps; }
+            return;
+        }
+        p += ps;
+    }
+}
+
+// Write an Intel HEX parsed memory image sparsely: only erase/program pages that contain data
+static int32_t write_ihex_sparse_pages(stlink_t *sl, uint8_t *mem, uint32_t size, stm32_addr_t base) {
+    if(size == 0) return 0;
+
+    uint8_t erased = stlink_get_erased_pattern(sl);
+
+    // Iterate over all flash pages overlapped by [base, base+size)
+    stm32_addr_t cur_addr = base;
+    stm32_addr_t range_end = base + size;
+
+    // Ensure the device parameters are loaded (page size depends on device)
+    stlink_core_id(sl);
+
+    while(cur_addr < range_end) {
+        stm32_addr_t page_start;
+        uint32_t page_size;
+        find_page_start_and_size(sl, cur_addr, &page_start, &page_size);
+        stm32_addr_t page_end = page_start + page_size;
+
+        // Compute indices within mem that map into this page
+        uint32_t idx_begin = (page_start > base) ? (uint32_t)(page_start - base) : 0u;
+        uint32_t idx_end = (page_end > range_end) ? (uint32_t)(range_end - base) : (uint32_t)(page_end - base);
+
+        // Quick check whether this page has any real data (bytes != erased pattern)
+        bool has_data = false;
+        for(uint32_t i = idx_begin; i < idx_end; ++i) {
+            if(mem[i] != erased) { has_data = true; break; }
+        }
+
+        if(has_data) {
+            // Build a full page buffer initialized to erased pattern
+            uint8_t *page_buf = (uint8_t *)malloc(page_size);
+            if(!page_buf) {
+                fprintf(stderr, "Out of memory allocating page buffer (%u bytes)\n", page_size);
+                return -1;
+            }
+            memset(page_buf, erased, page_size);
+
+            // Copy available data for this page from mem
+            for(uint32_t i = idx_begin; i < idx_end; ++i) {
+                stm32_addr_t byte_addr = base + i;
+                uint32_t off_in_page = (uint32_t)(byte_addr - page_start);
+                page_buf[off_in_page] = mem[i];
+            }
+
+            // Program this single page: stlink_write_flash erases pages intersecting the range
+            int32_t r = stlink_write_flash(sl, page_start, page_buf, page_size, 0, SECTION_ERASE);
+            free(page_buf);
+            if(r < 0) {
+                fprintf(stderr, "Failed to write flash page at %#x (size: %#x)\n", page_start, page_size);
+                return r;
+            }
+        }
+
+        // Advance to next page
+        cur_addr = page_end;
+    }
+
+    return 0;
+}
+
 static void cleanup(int32_t signum) {
     (void)signum;
 
@@ -162,7 +238,13 @@ int32_t main(int32_t ac, char** av) {
         }
         if((o.addr >= sl->flash_base) && (o.addr < sl->flash_base + sl->flash_size)) {
             if(o.format == FLASH_FORMAT_IHEX) {
-                err = stlink_mwrite_flash(sl, mem, size, o.addr, erase_type);
+                if(erase_type == SECTION_ERASE) {
+                    // Preserve unused sectors: only erase/program pages that contain data from HEX
+                    err = write_ihex_sparse_pages(sl, mem, size, o.addr);
+                } else {
+                    // For mass erase, fall back to contiguous write
+                    err = stlink_mwrite_flash(sl, mem, size, o.addr, erase_type);
+                }
             } else {
                 err = stlink_fwrite_flash(sl, o.filename, o.addr, erase_type);
             }
